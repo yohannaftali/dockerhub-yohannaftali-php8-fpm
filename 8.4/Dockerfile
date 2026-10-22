@@ -1,22 +1,13 @@
-ARG PHP_VERSION=8.2
-FROM php:${PHP_VERSION}-fpm
+FROM php:8.4-fpm
 
-LABEL org.opencontainers.image.title="php8-fpm" \
-      org.opencontainers.image.description="PHP 8.x-FPM with common extensions, redis, imagick, igbinary, sendmail and Composer" \
+LABEL org.opencontainers.image.title="php8.4-fpm" \
+      org.opencontainers.image.description="PHP 8.4-FPM with common extensions, redis, imagick, igbinary, sendmail and Composer" \
       org.opencontainers.image.authors="Yohan Naftali" \
       org.opencontainers.image.source="https://github.com/yohannaftali/dockerhub-yohannaftali-php8-fpm"
 
 ENV TZ=Asia/Jakarta
 ENV DEBIAN_FRONTEND=noninteractive
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# PHP 8.0 images are built on Debian 11 (bullseye), which is EOL and now lives on archive.debian.org
-RUN if grep -q bullseye /etc/os-release; then \
-      sed -i -e 's|deb.debian.org/debian-security|archive.debian.org/debian-security|g' \
-             -e 's|deb.debian.org/debian|archive.debian.org/debian|g' \
-             -e '/bullseye-updates/d' /etc/apt/sources.list \
-      && echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99archive; \
-    fi
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -63,8 +54,6 @@ RUN docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd
 RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd
 RUN docker-php-ext-configure intl
 RUN docker-php-ext-configure zip
-# OPcache is compiled into PHP 8.5+, older versions build it as an extension
-RUN if php -r 'exit(PHP_VERSION_ID < 80500 ? 0 : 1);'; then docker-php-ext-install -j$(nproc) opcache; fi
 RUN docker-php-ext-install -j$(nproc) \
     gd \
     mysqli \

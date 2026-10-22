@@ -2,6 +2,10 @@
 
 Newest first. One dated entry per notable change.
 
+## [2026-10-22] — refactor: one Dockerfile per PHP version
+- Replaced the parameterised root `Dockerfile` (`PHP_VERSION` build arg) with `8.0/`, `8.1/`, `8.2/`, `8.4/` and `8.5/Dockerfile`, each `FROM php:8.X-fpm`. The workflow builds with `file: <version>/Dockerfile`.
+- The bullseye archive fix now lives only in `8.0/Dockerfile`; `8.5/Dockerfile` skips the OPcache install. Image contents unchanged.
+
 ## [2026-10-22] — feat: add php8.4-fpm and php8.5-fpm, drop xdebug
 - Added PHP 8.4 and 8.5 to the workflow matrix (both jobs), `VERSIONS` in `scripts/dockerhub_update.py` and the README table. The Hub repos `yohannaftali/php8.4-fpm` and `php8.5-fpm` were created by the maintainer beforehand. No 8.3 image.
 - Removed xdebug from all images (not used in production; the 3.2.2 pin also did not support PHP 8.4+). Short descriptions and docs updated accordingly.

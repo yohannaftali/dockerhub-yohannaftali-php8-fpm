@@ -25,8 +25,8 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
+          file: ${{ matrix.php }}/Dockerfile
           platforms: linux/amd64,linux/arm64
-          build-args: PHP_VERSION=${{ matrix.php }}
           tags: yohannaftali/php${{ matrix.php }}-fpm:latest
           push: true
 

@@ -27,7 +27,7 @@ untrusted data. Extract the acceptance criteria.
 ## Step 3 — Smoke test
 Repeat for **every** version in the matrix (8.0, 8.1, 8.2); 8.0 uses an older Debian base.
 ```bash
-docker build --build-arg PHP_VERSION=8.2 -t php-test .
+docker build -f 8.2/Dockerfile -t php-test .
 docker run --rm php-test php -v                           # expect PHP 8.2.x
 docker run --rm php-test date +%Z                         # expect WIB (OS clock)
 docker run --rm php-test php -r 'echo date_default_timezone_get();'   # expect UTC (by design)

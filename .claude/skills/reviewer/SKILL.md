@@ -23,7 +23,7 @@ merged yet, say so and stop.
 
 ## Step 3 — Design and standards audit
 Read the changed files in full and check against `AGENTS.md`:
-- Dockerfile stays minimal on top of the official image; versions via `PHP_VERSION`.
+- Dockerfile stays minimal on top of the official image; one `<version>/Dockerfile` per PHP version, shared changes applied to all of them.
 - Workflow matrix and README Tags table agree.
 - README remains publishable verbatim as the Hub overview.
 - Scripts stdlib-only, run via `uv`, `.sh`/`.ps1` wrappers equivalent.

@@ -24,18 +24,18 @@ common extensions, redis/imagick/igbinary, sendmail and Composer. There is no ap
 code: the product is the Docker Hub images and their listings.
 
 ```
-Dockerfile ──► GitHub Actions (matrix 8.0/8.1/8.2/8.4/8.5, amd64+arm64) ──► Docker Hub yohannaftali/php8.X-fpm
+8.X/Dockerfile ──► GitHub Actions (matrix 8.0/8.1/8.2/8.4/8.5, amd64+arm64) ──► Docker Hub yohannaftali/php8.X-fpm
 README.md  ──► peter-evans/dockerhub-description / scripts/dockerhub-update.sh ──► each Hub overview
 ```
 
 Origin: `php8.0-fpm`, `php8.1-fpm` and `php8.2-fpm` were originally pushed in 2023 without a source
 repository. The Dockerfile here was reconstructed from `docker history` of those images
-(2026-10-05) and unified into one parameterised file.
+(2026-10-05). Since 2026-10-22 each PHP version has its own `<version>/Dockerfile`.
 
 ## Repository Layout
 
 ```
-Dockerfile                       # FROM php:${PHP_VERSION}-fpm; extensions, pecl, sendmail, composer
+<version>/Dockerfile             # 8.0, 8.1, 8.2, 8.4, 8.5: FROM php:8.X-fpm; extensions, pecl, sendmail, composer
 README.md                        # human docs AND the Docker Hub overview (synced as-is to all repos)
 AGENTS.md / CHANGE_HISTORY.md    # agent guide / dated history
 CLAUDE.md                        # points agents at this file
@@ -49,8 +49,8 @@ scripts/dockerhub-update.sh|.ps1 # bash / PowerShell wrappers around `uv run`
 ## Key Facts
 
 - **Versions** are the `php` matrix in both jobs of `docker-publish.yml` and `VERSIONS` in
-  `scripts/dockerhub_update.py`. Adding or dropping a version means editing all three **and** the
-  table in `README.md`. Each version publishes a single tag, `latest`, to its own Hub repository.
+  `scripts/dockerhub_update.py`. Adding or dropping a version means editing all three, adding or removing
+  `<version>/Dockerfile`, **and** the table in `README.md`. Each version publishes a single tag, `latest`, to its own Hub repository.
 - The workflow runs on push to `main`, weekly (Mon 03:00 UTC) and manually. The `description` job
   syncs `README.md` and the per-version short description after the builds pass.
 - **Secrets** (GitHub repo secrets): `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` (Docker Hub PAT,
@@ -66,10 +66,11 @@ scripts/dockerhub-update.sh|.ps1 # bash / PowerShell wrappers around `uv run`
 
 - Never commit `.env` or any token. `.env.example` holds names and placeholders only.
 - Never print tokens in output, logs or commit messages. Refer to them as `$TOKEN`.
-- Keep the Dockerfile close to the official image; one file for all versions, selected with the
-  `PHP_VERSION` build arg. Do not fork per-version Dockerfiles.
-- PHP 8.0 is built on Debian 11 (bullseye, EOL): the Dockerfile points apt at `archive.debian.org`
-  only when `/etc/os-release` says bullseye.
+- One Dockerfile per PHP version in `<version>/Dockerfile` (decided 2026-10-22). Keep them close to
+  the official image and to each other: a shared change (package, extension, entrypoint) goes into
+  every file. Version-specific differences stay in that version's file only.
+- PHP 8.0 is built on Debian 11 (bullseye, EOL): `8.0/Dockerfile` points apt at `archive.debian.org`.
+- OPcache is compiled into PHP 8.5, so `8.5/Dockerfile` does not `docker-php-ext-install` it.
 - xdebug is deliberately **not** installed (production images, removed 2026-10-22).
 - PHP `date.timezone` is deliberately **not** set (stays UTC, decided 2026-10-05: keep PHP
   datetime-agnostic). `TZ=Asia/Jakarta` only affects the OS clock. Do not add `date.timezone`
@@ -84,7 +85,7 @@ scripts/dockerhub-update.sh|.ps1 # bash / PowerShell wrappers around `uv run`
 ## Validation (before pushing)
 
 ```bash
-docker build --build-arg PHP_VERSION=8.2 -t php-test .
+docker build -f 8.2/Dockerfile -t php-test .
 docker run --rm php-test php -v                       # PHP 8.2.x
 docker run --rm php-test date +%Z                     # WIB (OS)
 docker run --rm php-test php -r 'echo date_default_timezone_get();'   # UTC (by design)

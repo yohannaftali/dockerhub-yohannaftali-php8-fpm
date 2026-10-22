@@ -81,7 +81,7 @@ docker run --rm yohannaftali/php8.2-fpm composer --version
 docker login
 
 # one version
-docker build --build-arg PHP_VERSION=8.2 -t yohannaftali/php8.2-fpm:latest .
+docker build -f 8.2/Dockerfile -t yohannaftali/php8.2-fpm:latest .
 docker push yohannaftali/php8.2-fpm:latest
 ```
 
@@ -89,7 +89,7 @@ Multi-arch (amd64 + arm64):
 
 ```bash
 docker buildx build --platform linux/amd64,linux/arm64 \
-  --build-arg PHP_VERSION=8.2 \
+  -f 8.2/Dockerfile \
   -t yohannaftali/php8.2-fpm:latest --push .
 ```
 
@@ -106,6 +106,7 @@ Required GitHub repository secrets:
 
 ### Adding a PHP version
 
+1. Copy the nearest `<version>/Dockerfile` to `<new version>/Dockerfile` and change its `FROM` and labels.
 1. Add the version to the `php` matrix in **both** jobs of the workflow, and to `VERSIONS` in `scripts/dockerhub_update.py`.
 2. Add it to the table at the top of this README.
 3. Create the Docker Hub repository `yohannaftali/php<version>-fpm` (or let the first push create it) and set its category.

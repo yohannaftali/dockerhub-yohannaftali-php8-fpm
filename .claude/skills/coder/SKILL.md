@@ -27,7 +27,7 @@ the user said to proceed autonomously.
 ## Step 4 — Implement
 First `git pull origin main`, then work on a branch (`git checkout -b <short-name>`), not on
 `main`: a push to `main` publishes images. Follow the guardrails in `AGENTS.md`, notably:
-- Dockerfile stays minimal on top of the official image; versions go through `PHP_VERSION`.
+- Dockerfile stays minimal on top of the official image; one `<version>/Dockerfile` per PHP version; apply shared changes to every file.
 - Tag changes must update both the workflow matrix and the README Tags table.
 - Never commit secrets; `.env.example` has names only.
 - Scripts stay stdlib-only Python run via `uv`; `.sh` and `.ps1` wrappers stay equivalent.
