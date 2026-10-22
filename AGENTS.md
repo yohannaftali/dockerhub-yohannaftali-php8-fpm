@@ -24,7 +24,7 @@ common extensions, redis/imagick/igbinary, sendmail and Composer. There is no ap
 code: the product is the Docker Hub images and their listings.
 
 ```
-8.X/Dockerfile ──► GitHub Actions (matrix 8.0/8.1/8.2/8.4/8.5, amd64+arm64) ──► Docker Hub yohannaftali/php8.X-fpm
+8.X/Dockerfile ──► GitHub Actions (8.0/8.1/8.2/8.4/8.5 × native amd64+arm64 runners, merged) ──► Docker Hub yohannaftali/php8.X-fpm
 README.md  ──► peter-evans/dockerhub-description / scripts/dockerhub-update.sh ──► each Hub overview
 ```
 
@@ -51,8 +51,14 @@ scripts/dockerhub-update.sh|.ps1 # bash / PowerShell wrappers around `uv run`
 - **Versions** are the `php` matrix in both jobs of `docker-publish.yml` and `VERSIONS` in
   `scripts/dockerhub_update.py`. Adding or dropping a version means editing all three, adding or removing
   `<version>/Dockerfile`, **and** the table in `README.md`. Each version publishes a single tag, `latest`, to its own Hub repository.
-- The workflow runs on push to `main`, weekly (Mon 03:00 UTC) and manually. The `description` job
-  syncs `README.md` and the per-version short description after the builds pass.
+- The workflow runs on push to `main`, weekly (Mon 03:00 UTC) and manually. Jobs:
+  `build` (version × platform; amd64 on `ubuntu-latest`, arm64 on native `ubuntu-24.04-arm`, no
+  QEMU) pushes each platform by digest only; `merge` (per version) joins both digests into the
+  multi-arch `latest` and refuses to tag unless both platforms built; `description` syncs
+  `README.md` and the per-version short description. `merge` and `description` run even when
+  another version failed, so one broken version does not block the rest.
+- Do not push `latest` by hand while CI runs: a local `docker push` is amd64-only and overwrites
+  the multi-arch tag. To restore, re-point it: `docker buildx imagetools create -t <repo>:latest <repo>@<multi-arch digest>`.
 - **Secrets** (GitHub repo secrets): `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` (Docker Hub PAT,
   scope *Read, Write, Delete*; description updates need Delete scope).
 - **Categories cannot be set via the Docker Hub API** (it silently ignores them). They are set

@@ -2,6 +2,11 @@
 
 Newest first. One dated entry per notable change.
 
+## [2026-10-22] — ci: native arm64 runners
+- `build` now runs per version × platform: amd64 on `ubuntu-latest`, arm64 on `ubuntu-24.04-arm` (no QEMU; the emulated arm64 build took ~1 hour). Each pushes by digest.
+- New `merge` job per version joins both digests into multi-arch `latest` (fails without both). `merge` and `description` run with `if: !cancelled()` so failing 8.0/8.1 no longer block 8.5's tag or the overview sync.
+- Incident the same day: a manual amd64-only `docker push` overwrote the CI multi-arch `php8.5-fpm:latest`; restored with `docker buildx imagetools create`. Rule added to AGENTS.md.
+
 ## [2026-10-22] — refactor: one Dockerfile per PHP version
 - Replaced the parameterised root `Dockerfile` (`PHP_VERSION` build arg) with `8.0/`, `8.1/`, `8.2/`, `8.4/` and `8.5/Dockerfile`, each `FROM php:8.X-fpm`. The workflow builds with `file: <version>/Dockerfile`.
 - The bullseye archive fix now lives only in `8.0/Dockerfile`; `8.5/Dockerfile` skips the OPcache install. Image contents unchanged.

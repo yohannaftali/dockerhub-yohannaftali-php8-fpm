@@ -34,8 +34,8 @@ Read the changed files in full and check against `AGENTS.md`:
 - **Secrets**: no token, password or `.env` value in the diff or in tracked files.
 - **Supply chain**: third-party actions pinned to a reasonable major version, no unexpected
   new actions or `curl | sh`; base image is the official `php`.
-- **Workflow**: secrets only used where needed; triggers unchanged unless intended; the
-  `description` job still depends on all builds.
+- **Workflow**: secrets only used where needed; triggers unchanged unless intended; `merge`
+  only tags `latest` when both platform digests exist; `merge`/`description` keep `if: !cancelled()`.
 - **Correctness**: Dockerfile builds for every matrix version (8.0 uses an older Debian base) and both platforms; shell and
   Python edge cases (missing `.env`, API errors) fail loudly.
 

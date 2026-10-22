@@ -95,7 +95,7 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 
 ## Automated publishing
 
-`.github/workflows/docker-publish.yml` builds and pushes all versions in parallel on every push to `main`, weekly, and on manual dispatch. It also syncs this README to each Docker Hub **overview** and sets each short **description**.
+`.github/workflows/docker-publish.yml` builds all versions in parallel on every push to `main`, weekly, and on manual dispatch. amd64 and arm64 each build on a native GitHub runner and are then merged into one multi-arch `latest` tag per version. It also syncs this README to each Docker Hub **overview** and sets each short **description**.
 
 Required GitHub repository secrets:
 
