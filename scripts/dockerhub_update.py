@@ -26,13 +26,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 API = "https://hub.docker.com/v2"
-VERSIONS = ["8.0", "8.1", "8.2"]
+VERSIONS = ["8.0", "8.1", "8.2", "8.4", "8.5"]
 REPOS = [f"php{v}-fpm" for v in VERSIONS]
 
 
 def short_description(repo):
     version = repo.removeprefix("php").removesuffix("-fpm")
-    return f"PHP {version}-FPM with redis, imagick, igbinary, Xdebug, sendmail and Composer. PHP stays UTC."
+    return f"PHP {version}-FPM with redis, imagick, igbinary, sendmail and Composer. PHP stays UTC."
 
 
 def load_env():

@@ -31,11 +31,11 @@ docker build --build-arg PHP_VERSION=8.2 -t php-test .
 docker run --rm php-test php -v                           # expect PHP 8.2.x
 docker run --rm php-test date +%Z                         # expect WIB (OS clock)
 docker run --rm php-test php -r 'echo date_default_timezone_get();'   # expect UTC (by design)
-docker run --rm php-test php -m                           # gd intl mysqli pdo_mysql zip soap redis imagick igbinary xdebug ...
+docker run --rm php-test php -m                           # gd intl mysqli pdo_mysql zip soap redis imagick igbinary ... (no xdebug)
 docker run --rm php-test composer --version
 docker run --rm php-test php-fpm -t                       # config test is successful
 ```
-No startup warnings (for example "Cannot load Xdebug") may appear.
+No startup warnings may appear.
 For workflow changes: validate the YAML and check both matrices and `VERSIONS` in the script agree.
 For script changes: run `status`/`tags` (read-only) with `.env`.
 Always clean up test containers and images you created.

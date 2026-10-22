@@ -2,7 +2,7 @@ ARG PHP_VERSION=8.2
 FROM php:${PHP_VERSION}-fpm
 
 LABEL org.opencontainers.image.title="php8-fpm" \
-      org.opencontainers.image.description="PHP 8.x-FPM with common extensions, redis, imagick, igbinary, Xdebug, sendmail and Composer" \
+      org.opencontainers.image.description="PHP 8.x-FPM with common extensions, redis, imagick, igbinary, sendmail and Composer" \
       org.opencontainers.image.authors="Yohan Naftali" \
       org.opencontainers.image.source="https://github.com/yohannaftali/dockerhub-yohannaftali-php8-fpm"
 
@@ -63,13 +63,14 @@ RUN docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd
 RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd
 RUN docker-php-ext-configure intl
 RUN docker-php-ext-configure zip
+# OPcache is compiled into PHP 8.5+, older versions build it as an extension
+RUN if php -r 'exit(PHP_VERSION_ID < 80500 ? 0 : 1);'; then docker-php-ext-install -j$(nproc) opcache; fi
 RUN docker-php-ext-install -j$(nproc) \
     gd \
     mysqli \
     pdo \
     pdo_mysql \
     zip \
-    opcache \
     soap \
     iconv \
     bcmath \
@@ -84,7 +85,6 @@ RUN docker-php-ext-install -j$(nproc) \
     ldap \
     sockets
 
-RUN pecl install xdebug-3.2.2
 RUN pecl install imagick
 RUN pecl install igbinary
 RUN pecl install redis
@@ -92,7 +92,6 @@ RUN docker-php-ext-enable \
     mysqli \
     pdo \
     pdo_mysql \
-    xdebug \
     imagick \
     igbinary \
     redis

@@ -1,6 +1,6 @@
 # yohannaftali/php8-fpm images
 
-[PHP 8.x-FPM](https://hub.docker.com/_/php) images with common extensions, redis, imagick, igbinary, Xdebug, sendmail and Composer. The container clock is set to **Asia/Jakarta (WIB, UTC+7)**; PHP itself stays on UTC (see Overview).
+[PHP 8.x-FPM](https://hub.docker.com/_/php) images with common extensions, redis, imagick, igbinary, sendmail and Composer. The container clock is set to **Asia/Jakarta (WIB, UTC+7)**; PHP itself stays on UTC (see Overview).
 
 One image per PHP version, each in its own Docker Hub repository:
 
@@ -9,11 +9,13 @@ One image per PHP version, each in its own Docker Hub repository:
 | [`yohannaftali/php8.0-fpm`](https://hub.docker.com/r/yohannaftali/php8.0-fpm) | 8.0 | `docker pull yohannaftali/php8.0-fpm` |
 | [`yohannaftali/php8.1-fpm`](https://hub.docker.com/r/yohannaftali/php8.1-fpm) | 8.1 | `docker pull yohannaftali/php8.1-fpm` |
 | [`yohannaftali/php8.2-fpm`](https://hub.docker.com/r/yohannaftali/php8.2-fpm) | 8.2 | `docker pull yohannaftali/php8.2-fpm` |
+| [`yohannaftali/php8.4-fpm`](https://hub.docker.com/r/yohannaftali/php8.4-fpm) | 8.4 | `docker pull yohannaftali/php8.4-fpm` |
+| [`yohannaftali/php8.5-fpm`](https://hub.docker.com/r/yohannaftali/php8.5-fpm) | 8.5 | `docker pull yohannaftali/php8.5-fpm` |
 
 - Source code (Dockerfile, build workflow, scripts): <https://github.com/yohannaftali/dockerhub-yohannaftali-php8-fpm>
 - Issues and feature requests: <https://github.com/yohannaftali/dockerhub-yohannaftali-php8-fpm/issues>
 
-> **Note:** PHP 8.0 and 8.1 are end-of-life and PHP 8.2 receives security fixes only until its own end of life. Rebuilding weekly picks up whatever the official `php` image still publishes for each version, nothing more.
+> **Note:** PHP 8.0 and 8.1 are end-of-life and PHP 8.2 receives security fixes only. PHP 8.4 and 8.5 are actively supported. There is no 8.3 image. Rebuilding weekly picks up whatever the official `php` image still publishes for each version, nothing more.
 
 ## Use these images
 
@@ -30,13 +32,11 @@ services:
 Each image is built `FROM php:<version>-fpm` and adds:
 
 - **Timezone**: `TZ=Asia/Jakarta` for the operating system (`date`, logs, cron). PHP's `date.timezone` is intentionally left at its default, UTC, so applications stay timezone-agnostic. Set `date_default_timezone_set()` or `date.timezone` yourself if you need local time.
-- **Extensions**: `gd` (freetype, jpeg, webp), `mysqli`, `pdo`, `pdo_mysql`, `zip`, `opcache`, `soap`, `iconv`, `bcmath`, `mbstring`, `pcntl`, `exif`, `intl`, `curl`, `ctype`, `simplexml`, `xml`, `ldap`, `sockets`, plus `xdebug` (3.2.2), `imagick`, `igbinary` and `redis` from PECL.
+- **Extensions**: `gd` (freetype, jpeg, webp), `mysqli`, `pdo`, `pdo_mysql`, `zip`, `opcache`, `soap`, `iconv`, `bcmath`, `mbstring`, `pcntl`, `exif`, `intl`, `curl`, `ctype`, `simplexml`, `xml`, `ldap`, `sockets`, plus `imagick`, `igbinary` and `redis` from PECL. Xdebug is not included (production images).
 - **Composer** (latest) at `/usr/local/bin/composer`.
 - **Mail**: `sendmail` configured as `sendmail_path`; the entrypoint restarts it on container start.
 - **Hosts entry**: the entrypoint appends the container's IP and hostname to `/etc/hosts` (needed by sendmail).
 - **Tools**: `git`, `nano`, `wget`, `curl`, `openssl`, `zip`, `unzip`, and `jpegoptim`, `optipng`, `pngquant`, `gifsicle`.
-
-Xdebug is installed but not configured to start; configure it with your own ini file (`xdebug.mode`, `xdebug.client_host`).
 
 ## Tags
 

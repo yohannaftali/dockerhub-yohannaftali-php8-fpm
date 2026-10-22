@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ["8.0", "8.1", "8.2"]
+        php: ["8.0", "8.1", "8.2", "8.4", "8.5"]
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: ["8.0", "8.1", "8.2"]
+        php: ["8.0", "8.1", "8.2", "8.4", "8.5"]
     steps:
       - uses: actions/checkout@v4
       - uses: peter-evans/dockerhub-description@v4
@@ -43,5 +43,5 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: yohannaftali/php${{ matrix.php }}-fpm
-          short-description: "PHP ${{ matrix.php }}-FPM with redis, imagick, igbinary, Xdebug, sendmail and Composer. PHP stays UTC."
+          short-description: "PHP ${{ matrix.php }}-FPM with redis, imagick, igbinary, sendmail and Composer. PHP stays UTC."
           readme-filepath: ./README.md

@@ -14,16 +14,17 @@
 - platform: GitHub (use the `gh` CLI; it is already authenticated on the maintainer's machine)
 - default branch: `main`
 - Docker Hub images (one repository per PHP version): `yohannaftali/php8.0-fpm`,
-  `yohannaftali/php8.1-fpm`, `yohannaftali/php8.2-fpm`
+  `yohannaftali/php8.1-fpm`, `yohannaftali/php8.2-fpm`,
+  `yohannaftali/php8.4-fpm`, `yohannaftali/php8.5-fpm` (no 8.3)
 
 ## Big Picture
 
 A tiny repo that builds and publishes [PHP-FPM](https://hub.docker.com/_/php) 8.x images with
-common extensions, redis/imagick/igbinary/xdebug, sendmail and Composer. There is no application
+common extensions, redis/imagick/igbinary, sendmail and Composer. There is no application
 code: the product is the Docker Hub images and their listings.
 
 ```
-Dockerfile ──► GitHub Actions (matrix 8.0/8.1/8.2, amd64+arm64) ──► Docker Hub yohannaftali/php8.X-fpm
+Dockerfile ──► GitHub Actions (matrix 8.0/8.1/8.2/8.4/8.5, amd64+arm64) ──► Docker Hub yohannaftali/php8.X-fpm
 README.md  ──► peter-evans/dockerhub-description / scripts/dockerhub-update.sh ──► each Hub overview
 ```
 
@@ -68,7 +69,8 @@ scripts/dockerhub-update.sh|.ps1 # bash / PowerShell wrappers around `uv run`
 - Keep the Dockerfile close to the official image; one file for all versions, selected with the
   `PHP_VERSION` build arg. Do not fork per-version Dockerfiles.
 - PHP 8.0 is built on Debian 11 (bullseye, EOL): the Dockerfile points apt at `archive.debian.org`
-  only when `/etc/os-release` says bullseye. xdebug is pinned to `3.2.2` (supports 8.0 to 8.3).
+  only when `/etc/os-release` says bullseye.
+- xdebug is deliberately **not** installed (production images, removed 2026-10-22).
 - PHP `date.timezone` is deliberately **not** set (stays UTC, decided 2026-10-05: keep PHP
   datetime-agnostic). `TZ=Asia/Jakarta` only affects the OS clock. Do not add `date.timezone`
   without asking.
