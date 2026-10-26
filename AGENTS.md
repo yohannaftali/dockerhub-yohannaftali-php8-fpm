@@ -24,7 +24,7 @@ common extensions, redis/imagick/igbinary, sendmail and Composer. There is no ap
 code: the product is the Docker Hub images and their listings.
 
 ```
-8.X/Dockerfile ──► GitHub Actions (8.0/8.1/8.2/8.4/8.5 × native amd64+arm64 runners, merged) ──► Docker Hub yohannaftali/php8.X-fpm
+8.X/Dockerfile (8.0/8.1: debian:trixie + Sury PHP; 8.2+: official php) ──► GitHub Actions (8.0/8.1/8.2/8.4/8.5 × native amd64+arm64 runners, merged) ──► Docker Hub yohannaftali/php8.X-fpm
 README.md  ──► peter-evans/dockerhub-description / scripts/dockerhub-update.sh ──► each Hub overview
 ```
 
@@ -35,7 +35,7 @@ repository. The Dockerfile here was reconstructed from `docker history` of those
 ## Repository Layout
 
 ```
-<version>/Dockerfile             # 8.0, 8.1, 8.2, 8.4, 8.5: FROM php:8.X-fpm; extensions, pecl, sendmail, composer
+<version>/Dockerfile             # 8.2, 8.4, 8.5: FROM php:8.X-fpm; 8.0, 8.1: FROM debian:trixie + Sury packages; extensions, sendmail, composer
 README.md                        # human docs AND the Docker Hub overview (synced as-is to all repos)
 AGENTS.md / CHANGE_HISTORY.md    # agent guide / dated history
 CLAUDE.md                        # points agents at this file
@@ -75,12 +75,19 @@ scripts/dockerhub-update.sh|.ps1 # bash / PowerShell wrappers around `uv run`
 - One Dockerfile per PHP version in `<version>/Dockerfile` (decided 2026-10-22). Keep them close to
   the official image and to each other: a shared change (package, extension, entrypoint) goes into
   every file. Version-specific differences stay in that version's file only.
-- PHP 8.0 is built on Debian 11 (bullseye, EOL): `8.0/Dockerfile` points apt at `archive.debian.org`.
+- PHP 8.0 and 8.1 are EOL and the official image no longer gets fixes (PHP2Shell, CVE-2026-109618/109619,
+  fixed only in 8.2.35/8.4.27/8.5.12). Since 2026-10-26 `8.0/` and `8.1/Dockerfile` build `FROM debian:trixie`
+  with `php<v>-*` packages from `packages.sury.org/php` (Ondřej Surý, backported fixes). They mimic the
+  official layout: `php-fpm` symlink, `docker-php-entrypoint`, FPM on :9000 in the foreground, no `php.ini`,
+  `PHP_INI_SCAN_DIR=:/usr/local/etc/php/conf.d`. Debian's PHP follows the OS `TZ`, so PHP there
+  reports `Asia/Jakarta` (maintainer decision 2026-10-26; no `date.timezone` pin). There are no `docker-php-ext-*` helpers there; add extensions as
+  `php<v>-<ext>` apt packages. 8.0/8.1 keep these two files in sync with each other (they differ only in `ARG PHP`).
+  Before moving 8.2 off the official image, confirm it has really stopped receiving fixes.
 - OPcache is compiled into PHP 8.5, so `8.5/Dockerfile` does not `docker-php-ext-install` it.
 - xdebug is deliberately **not** installed (production images, removed 2026-10-22).
-- PHP `date.timezone` is deliberately **not** set (stays UTC, decided 2026-10-05: keep PHP
-  datetime-agnostic). `TZ=Asia/Jakarta` only affects the OS clock. Do not add `date.timezone`
-  without asking.
+- PHP `date.timezone` is deliberately **not** set. On the official-image versions (8.2/8.4/8.5) PHP
+  stays UTC (decided 2026-10-05) and `TZ=Asia/Jakarta` only affects the OS clock. On 8.0/8.1 PHP
+  follows `TZ` and reports `Asia/Jakarta` (decided 2026-10-26). Do not add `date.timezone` without asking.
 - These images are in use by other apps under their existing names. Never rename or delete the Hub
   repositories, and never push anything except `latest` builds of the same PHP minor version.
 - Python scripts are stdlib-only and run through `uv`; bash and PowerShell wrappers stay thin and
@@ -94,13 +101,14 @@ scripts/dockerhub-update.sh|.ps1 # bash / PowerShell wrappers around `uv run`
 docker build -f 8.2/Dockerfile -t php-test .
 docker run --rm php-test php -v                       # PHP 8.2.x
 docker run --rm php-test date +%Z                     # WIB (OS)
-docker run --rm php-test php -r 'echo date_default_timezone_get();'   # UTC (by design)
+docker run --rm php-test php -r 'echo date_default_timezone_get();'   # UTC on 8.2+, Asia/Jakarta on 8.0/8.1
 docker run --rm php-test composer --version
 docker run --rm php-test php-fpm -t                   # config valid
 uv run scripts/dockerhub_update.py status             # needs .env; read-only
 ```
 
-Repeat the build for every version in the matrix (at least 8.0, which uses the older Debian base).
+Repeat the build for every version in the matrix (at least 8.0 or 8.1, which use the Sury-based Dockerfile). For
+8.0/8.1 also check that the fixes are in: `docker run --rm php-test sh -c 'zcat /usr/share/doc/php8.1-common/changelog.Debian.gz | grep CVE-2026-109618'`.
 See the `tester` skill for the full smoke test.
 
 ## Agent Skills (`.claude/skills/`)
