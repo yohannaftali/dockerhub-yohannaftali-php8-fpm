@@ -2,6 +2,11 @@
 
 Newest first. One dated entry per notable change.
 
+## [2026-10-26] — security: PHP2Shell fix for 8.0 and 8.1 via Sury packages
+- PHP2Shell (CVE-2026-109618, CVE-2026-109619, critical RCE, exploited in the wild) is fixed upstream in 8.2.35, 8.4.27 and 8.5.12. The official `php` images for those versions carry the fix, so 8.2/8.4/8.5 are unchanged and get it on rebuild.
+- 8.0 and 8.1 (EOL; the official images are frozen at 8.0.30/8.1.34) now build `FROM debian:trixie` with PHP from `packages.sury.org/php`. Sury's 2026-10-21 builds (`8.0.30-25`, `8.1.34-9`) backport both CVEs, as their Debian changelog shows.
+- These images mimic the official layout (php-fpm on :9000, entrypoint, `/var/www/html`, no php.ini). PHP follows the OS `TZ`, so PHP's timezone changes from UTC to Asia/Jakarta on 8.0/8.1 (maintainer's choice). They drop the build toolchain, `-dev` libraries and `docker-php-ext-*` helpers. They add a few extensions that Debian builds in (calendar, ffi, ftp, gettext, shmop, sysv*, xsl). 8.0 moves off EOL bullseye, which also removes the `archive.debian.org` workaround.
+
 ## [2026-10-22] — ci: native arm64 runners
 - `build` now runs per version × platform: amd64 on `ubuntu-latest`, arm64 on `ubuntu-24.04-arm` (no QEMU; the emulated arm64 build took ~1 hour). Each pushes by digest.
 - New `merge` job per version joins both digests into multi-arch `latest` (fails without both). `merge` and `description` run with `if: !cancelled()` so failing 8.0/8.1 no longer block 8.5's tag or the overview sync.

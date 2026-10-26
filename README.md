@@ -1,6 +1,6 @@
 # yohannaftali/php8-fpm images
 
-[PHP 8.x-FPM](https://hub.docker.com/_/php) images with common extensions, redis, imagick, igbinary, sendmail and Composer. The container clock is set to **Asia/Jakarta (WIB, UTC+7)**; PHP itself stays on UTC (see Overview).
+[PHP 8.x-FPM](https://hub.docker.com/_/php) images with common extensions, redis, imagick, igbinary, sendmail and Composer. The container clock is set to **Asia/Jakarta (WIB, UTC+7)**; PHP uses UTC on 8.2/8.4/8.5 and Asia/Jakarta on 8.0/8.1 (see Overview).
 
 One image per PHP version, each in its own Docker Hub repository:
 
@@ -15,7 +15,7 @@ One image per PHP version, each in its own Docker Hub repository:
 - Source code (Dockerfile, build workflow, scripts): <https://github.com/yohannaftali/dockerhub-yohannaftali-php8-fpm>
 - Issues and feature requests: <https://github.com/yohannaftali/dockerhub-yohannaftali-php8-fpm/issues>
 
-> **Note:** PHP 8.0 and 8.1 are end-of-life and PHP 8.2 receives security fixes only. PHP 8.4 and 8.5 are actively supported. There is no 8.3 image. Rebuilding weekly picks up whatever the official `php` image still publishes for each version, nothing more.
+> **Note:** PHP 8.0 and 8.1 are end-of-life upstream, and the official `php` image no longer updates them. These two images are built on Debian 13 (trixie) with PHP from [Ondřej Surý's repository](https://packages.sury.org/php/), which backports security fixes such as PHP2Shell (CVE-2026-109618, CVE-2026-109619). PHP 8.2 receives security fixes only; 8.4 and 8.5 are actively supported. These three use the official `php` image. There is no 8.3 image. All images are rebuilt weekly.
 
 ## Use these images
 
@@ -29,9 +29,11 @@ services:
 
 ## Overview
 
-Each image is built `FROM php:<version>-fpm` and adds:
+PHP 8.2, 8.4 and 8.5 are built `FROM php:<version>-fpm`. PHP 8.0 and 8.1 are built `FROM debian:trixie` with the `php<version>-*` packages from packages.sury.org, laid out like the official image: `php-fpm` in the foreground on port 9000, `docker-php-entrypoint`, workdir `/var/www/html`, no `php.ini` (built-in defaults), and extra `.ini` files read from `/usr/local/etc/php/conf.d`. Differences for 8.0/8.1: PHP lives in `/usr/bin` and `/etc/php/<version>/`, and the `docker-php-ext-*` helpers and build toolchain are absent (install extra extensions with `apt-get install php<version>-<ext>`).
 
-- **Timezone**: `TZ=Asia/Jakarta` for the operating system (`date`, logs, cron). PHP's `date.timezone` is intentionally left at its default, UTC, so applications stay timezone-agnostic. Set `date_default_timezone_set()` or `date.timezone` yourself if you need local time.
+Every image adds:
+
+- **Timezone**: `TZ=Asia/Jakarta` for the operating system (`date`, logs, cron). On 8.2, 8.4 and 8.5, PHP's `date.timezone` is left at its default, UTC. On 8.0 and 8.1, Debian's PHP follows the OS timezone, so PHP also uses Asia/Jakarta, or whatever `TZ` you pass at runtime. Set `date_default_timezone_set()` or `date.timezone` yourself if you need a fixed value.
 - **Extensions**: `gd` (freetype, jpeg, webp), `mysqli`, `pdo`, `pdo_mysql`, `zip`, `opcache`, `soap`, `iconv`, `bcmath`, `mbstring`, `pcntl`, `exif`, `intl`, `curl`, `ctype`, `simplexml`, `xml`, `ldap`, `sockets`, plus `imagick`, `igbinary` and `redis` from PECL. Xdebug is not included (production images).
 - **Composer** (latest) at `/usr/local/bin/composer`.
 - **Mail**: `sendmail` configured as `sendmail_path`; the entrypoint restarts it on container start.
@@ -40,7 +42,7 @@ Each image is built `FROM php:<version>-fpm` and adds:
 
 ## Tags
 
-Each repository has a single tag, `latest`, rebuilt weekly from `php:<version>-fpm`.
+Each repository has a single tag, `latest`, rebuilt weekly (8.2/8.4/8.5 from `php:<version>-fpm`, 8.0/8.1 from Debian trixie plus Sury's packages).
 
 ## Quick start
 
@@ -70,7 +72,7 @@ Verify an image:
 ```bash
 docker run --rm yohannaftali/php8.2-fpm php -v
 docker run --rm yohannaftali/php8.2-fpm date +%Z                                  # WIB (OS)
-docker run --rm yohannaftali/php8.2-fpm php -r 'echo date_default_timezone_get();' # UTC (by design)
+docker run --rm yohannaftali/php8.2-fpm php -r 'echo date_default_timezone_get();' # UTC on 8.2+, Asia/Jakarta on 8.0/8.1
 docker run --rm yohannaftali/php8.2-fpm php -m
 docker run --rm yohannaftali/php8.2-fpm composer --version
 ```
