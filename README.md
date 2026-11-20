@@ -77,6 +77,49 @@ docker run --rm yohannaftali/php8.2-fpm php -m
 docker run --rm yohannaftali/php8.2-fpm composer --version
 ```
 
+## Updating running containers
+
+`docker pull` only downloads the new image. A running container keeps using the image it was created from until you remove it and create it again. Data in volumes and bind mounts is kept; anything written inside the container itself is lost when it is recreated.
+
+### With docker compose (recommended)
+
+In the folder that has your `docker-compose.yml`:
+
+```bash
+docker compose pull          # download newer images
+docker compose up -d         # recreate only the containers whose image changed
+docker image prune -f        # optional: remove the old, unused images
+```
+
+To update one service only: `docker compose pull php && docker compose up -d php`.
+
+### With plain docker run
+
+```bash
+docker pull yohannaftali/php8.5-fpm
+
+# is the container on the old image? (different IDs = needs update)
+docker inspect -f '{{.Image}}' php
+docker image inspect -f '{{.Id}}' yohannaftali/php8.5-fpm
+
+docker stop php && docker rm php
+docker run -d --name php -v ./app:/var/www/html yohannaftali/php8.5-fpm
+```
+
+Recreate it with exactly the same options as before (ports, volumes, `-e` variables, network, `--restart`). If you do not remember them, read them before removing the container:
+
+```bash
+docker inspect php --format '{{json .HostConfig.Binds}} {{json .HostConfig.PortBindings}} {{json .Config.Env}} {{.HostConfig.NetworkMode}}'
+```
+
+Keeping the options in a `docker-compose.yml` turns every future update into the two commands above.
+
+### Notes for PHP-FPM
+
+- Each PHP version has its own repository with a single `latest` tag, so updating only brings patch releases of the same PHP version (for example 8.5.12 -> 8.5.13). Moving to another PHP version means changing the image name, e.g. `php8.4-fpm` -> `php8.5-fpm`; test your application first.
+- While php-fpm is recreated, nginx returns `502 Bad Gateway` for a few seconds; do it at a quiet time. nginx reconnects by itself; if it does not, restart nginx too.
+- Check the version after updating: `docker exec php php -v`.
+
 ## Build (maintainers)
 
 ```bash
