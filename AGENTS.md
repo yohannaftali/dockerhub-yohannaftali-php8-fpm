@@ -43,7 +43,7 @@ CLAUDE.md                        # points agents at this file
 .github/workflows/docker-publish.yml   # build+push matrix, then description sync
 scripts/dockerhub_update.py      # Docker Hub API helper for all repos (stdlib only, run via uv)
 scripts/dockerhub-update.sh|.ps1 # bash / PowerShell wrappers around `uv run`
-.claude/skills/                  # planner, coder, tester, reviewer (see below)
+.claude/skills/                  # planner, coder, tester, reviewer, updater (see below)
 ```
 
 ## Key Facts
@@ -119,8 +119,11 @@ Adapted from the sibling Docker Hub repos (no issue-tracker UI, no browser).
 - **`coder`**: implements an issue (Dockerfile, workflow, scripts, README) per these rules.
 - **`tester`**: builds each version locally, smoke-tests it, and only then opens/merges a PR.
 - **`reviewer`**: post-merge audit of what landed on `main` and on Docker Hub.
+- **`updater`**: no-code rebuild: compares upstream PHP (official image / Sury) with what is
+  published, triggers `docker-publish.yml` via `gh workflow run`, and verifies the new version
+  and both platforms on Docker Hub. Never pushes locally.
 
-Flow: `planner` -> `coder` -> `tester` -> `reviewer`.
+Flow: `planner` -> `coder` -> `tester` -> `reviewer`. Patch-release rebuilds: `updater` alone.
 
 ## Tracked Issues
 

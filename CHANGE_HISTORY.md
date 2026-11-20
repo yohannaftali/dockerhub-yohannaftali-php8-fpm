@@ -2,6 +2,9 @@
 
 Newest first. One dated entry per notable change.
 
+## [2026-11-20] — skills: add `updater`
+- New `.claude/skills/updater` skill: checks upstream vs published PHP versions, triggers the publish workflow and verifies the result on Docker Hub. First used to publish `php8.5-fpm:latest` 8.5.12 -> 8.5.13 (run 44650878100).
+
 ## [2026-10-26] — security: PHP2Shell fix for 8.0 and 8.1 via Sury packages
 - PHP2Shell (CVE-2026-109618, CVE-2026-109619, critical RCE, exploited in the wild) is fixed upstream in 8.2.35, 8.4.27 and 8.5.12. The official `php` images for those versions carry the fix, so 8.2/8.4/8.5 are unchanged and get it on rebuild.
 - 8.0 and 8.1 (EOL; the official images are frozen at 8.0.30/8.1.34) now build `FROM debian:trixie` with PHP from `packages.sury.org/php`. Sury's 2026-10-21 builds (`8.0.30-25`, `8.1.34-9`) backport both CVEs, as their Debian changelog shows.
