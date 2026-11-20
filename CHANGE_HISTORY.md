@@ -2,6 +2,9 @@
 
 Newest first. One dated entry per notable change.
 
+## [2026-11-20] — skills: `updater` smoke test and version list
+- `updater` now builds and smoke-tests each version locally (`php -v`, `php-fpm -t`, extensions, Composer; never pushed) before triggering the publish, and derives the version list from `VERSIONS` in `scripts/dockerhub_update.py` (split into official/Sury by each Dockerfile's `FROM`) instead of hardcoded loops.
+
 ## [2026-11-20] — skills: add `updater`
 - New `.claude/skills/updater` skill: checks upstream vs published PHP versions, triggers the publish workflow and verifies the result on Docker Hub. First used to publish `php8.5-fpm:latest` 8.5.12 -> 8.5.13 (run 44650878100).
 
