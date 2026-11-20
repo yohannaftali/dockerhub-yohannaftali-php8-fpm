@@ -123,6 +123,8 @@ The image must be on the Docker host where the stack runs (the Portainer *enviro
 - **Several stacks on the same host using this image**: images are stored once per host, so re-pull in the first stack only; for the others, **Update the stack** without re-pull is enough.
 - **Docker Swarm**: every node that runs the service needs the image. **Re-pull image** on the stack or service update makes each node pull it. If containers stay on the old image, run `docker service update --force --image yohannaftali/php8.5-fpm <service>` on a manager.
 
+**If the Portainer host is down**, your containers keep running: they are run by the Docker daemon on the stack host, and Portainer only manages them. Restart policies (`restart: unless-stopped`, `always`) still apply, so crashed containers and a rebooted stack host come back without Portainer, and Swarm still reschedules services. Until Portainer is back you cannot deploy, update, re-pull or view logs from its UI, and its Git auto-updates and webhooks do not run; you can still manage the containers with `docker` / `docker compose` on the stack host. Only if Portainer runs on the same machine as the stack does "Portainer down" mean the containers are down too.
+
 Button names can differ slightly between Portainer versions.
 
 ### Notes for PHP-FPM

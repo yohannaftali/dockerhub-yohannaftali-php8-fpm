@@ -5,6 +5,7 @@ Newest first. One dated entry per notable change.
 ## [2026-11-20] — docs: README guide for updating running containers
 - New "Updating running containers" section in `README.md` (also the Docker Hub overview): `docker pull` does not change a running container; how to recreate with docker compose or plain `docker run`, plus image-specific notes.
 - Added a "With Portainer" subsection: pull happens on the stack's Docker host (not the Portainer server); Re-pull image and redeploy for stacks, Recreate with Re-pull for containers, Swarm notes.
+- Added what happens when the Portainer host is down (containers keep running; only management via Portainer stops).
 
 ## [2026-11-20] — skills: `updater` smoke test and version list
 - `updater` now builds and smoke-tests each version locally (`php -v`, `php-fpm -t`, extensions, Composer; never pushed) before triggering the publish, and derives the version list from `VERSIONS` in `scripts/dockerhub_update.py` (split into official/Sury by each Dockerfile's `FROM`) instead of hardcoded loops.
